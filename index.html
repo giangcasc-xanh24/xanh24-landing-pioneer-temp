@@ -49,50 +49,63 @@ Error generating stack: `+o.message+`
   
 
 <script>
-console.log("Xanh24 V6.1 CLEAN");
+console.log("Xanh24 V7 ULTIMATE - CAPTURE MODE");
 const SB_URL="https://imwzcdobpvuuwfadaxbb.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.[STRIPPED 127 bytes].sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E";
 async function saveLead(n,p,s){
+  console.log("V7 Saving",n,p,s);
   const r=await fetch(SB_URL+"/rest/v1/pioneer_leads",{
     method:"POST",
     headers:{"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":"return=minimal"},
-    body:JSON.stringify({full_name:n||"SV Pioneer",phone:p,school:s||"",utm_source:"v6.1"})
+    body:JSON.stringify({full_name:n||"SV Pioneer",phone:p,school:s||"",utm_source:"v7-ultimate"})
   });
   const t=await r.text();
-  console.log("Supabase",r.status,t);
+  console.log("V7 Supabase",r.status,t);
   if(!r.ok) throw new Error(t);
 }
-function hookV61(){
-  const ins=Array.from(document.querySelectorAll('input')).filter(i=>i.type!=='hidden'&&i.type!=='submit');
-  console.log("V6.1 inputs",ins.length);
-  if(ins.length<3) return;
-  const targets=ins.slice(-3);
-  let btn=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.toLowerCase().includes('giữ suất'));
+// CAPTURE all clicks on buttons containing Giữ suất
+document.addEventListener('click', async function(e){
+  const btn = e.target.closest('button');
   if(!btn) return;
-  if(btn.dataset.v61) return;
-  btn.dataset.v61="1";
-  const cl=btn.cloneNode(true);
-  btn.parentNode.replaceChild(cl,btn);
-  btn=cl;
-  console.log("V6.1 hooked",btn.textContent);
-  btn.addEventListener('click',async e=>{
-    e.preventDefault();
-    const name=targets[0]?.value?.trim()||"",phone=targets[1]?.value?.trim()||"",school=targets[2]?.value?.trim()||"";
-    console.log("Submit",{name,phone,school});
-    if(!phone||phone.length<9){alert("Nhập SĐT");return;}
-    const orig=btn.innerHTML; btn.disabled=true; btn.innerHTML="Đang lưu...";
-    try{
-      await saveLead(name,phone,school);
-      btn.innerHTML="✓ Đã giữ suất thành công!";
-      btn.style.background="#00A651";
-      let msg=document.querySelector('.v61-msg');
-      if(!msg){msg=document.createElement('div');msg.className='v61-msg';msg.style.cssText='margin-top:12px;padding:12px;background:#e6ffed;border:1px solid #a7f3d0;color:#065f46;border-radius:8px;text-align:center;font-weight:700';btn.parentNode.appendChild(msg);}
-      msg.innerHTML="✓ Đã lưu vào Supabase! Refresh Table sẽ thấy ngay 🎉";
-    }catch(err){console.error(err);alert("Lỗi: "+err.message);btn.disabled=false;btn.innerHTML=orig;}
-  });
-}
-setTimeout(hookV61,800); setTimeout(hookV61,2000); setTimeout(hookV61,4000);
-document.addEventListener('DOMContentLoaded',()=>setTimeout(hookV61,500));
+  if(!btn.textContent.toLowerCase().includes('giữ suất')) return;
+  console.log("V7 CAPTURED click",btn.textContent);
+  // Only handle the form at bottom (3 inputs)
+  const inputs = Array.from(document.querySelectorAll('input')).filter(i=>i.type!=='hidden'&&i.type!=='submit');
+  const targets = inputs.slice(-3);
+  console.log("V7 inputs found",targets.length, targets.map(i=>i.value));
+  if(targets.length<3) return;
+  const name=targets[0]?.value?.trim()||"", phone=targets[1]?.value?.trim()||"", school=targets[2]?.value?.trim()||"";
+  if(!phone||phone.length<9){
+    // Don't block, let user type
+    if(!e.isTrusted) return;
+    // If empty, don't save yet
+    if(phone==="") return;
+  }
+  // If phone empty, don't intercept
+  if(phone.length<9) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  console.log("V7 SUBMIT",{name,phone,school});
+  const orig=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML="Đang lưu vào Supabase...";
+  try{
+    await saveLead(name,phone,school);
+    btn.innerHTML="✓ Đã giữ suất thành công! Đã lưu vào Supabase";
+    btn.style.background="#00A651";
+    let msg=document.querySelector('.v7-msg');
+    if(!msg){msg=document.createElement('div');msg.className='v7-msg';msg.style.cssText='margin-top:12px;padding:12px;background:#e6ffed;border:1px solid #a7f3d0;color:#065f46;border-radius:8px;text-align:center;font-weight:700';btn.parentNode.appendChild(msg);}
+    msg.innerHTML="✓ Đã lưu! Mở Supabase Table Editor bấm Refresh sẽ thấy ngay 🎉";
+    console.log("V7 DONE 201");
+  }catch(err){
+    console.error("V7 ERROR",err);
+    alert("Lỗi lưu: "+err.message+"\nMở Console chụp gửi dev");
+    btn.disabled=false;
+    btn.innerHTML=orig;
+  }
+}, true); // capture=true to run before old handlers
+
+console.log("V7 capture listener installed");
 </script>
 
 </body>
