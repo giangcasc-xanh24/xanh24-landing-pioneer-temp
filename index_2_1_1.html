@@ -48,95 +48,64 @@ Error generating stack: `+o.message+`
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
 
-<!-- SUPABASE V3 DIRECT REST - FIX FINAL -->
+<!-- SUPABASE INTEGRATION FOR PIONEER LEADS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>
-console.log("Xanh24 Supabase V3 loading...");
 window.SUPABASE_URL = "https://imwzcdobpvuuwfadaxbb.supabase.co";
-window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltd3pjZG9icHZ1dXdmYWRheGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMDc5MTMsImV4cCI6MjEwNDU4MzkxM30.sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E";
+window.SUPABASE_ANON_KEY = "%%ANON_KEY_PLACEHOLDER%%"; // <-- bạn dán anon key vào đây
+window.supabaseClient = null;
+try {
+  if(window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY && !window.SUPABASE_ANON_KEY.includes("PLACEHOLDER")) {
+    window.supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    console.log("Supabase connected:", window.SUPABASE_URL);
+  }
+} catch(e) { console.warn("Supabase init error", e); }
 
-async function saveLead(full_name, phone, school) {
-  const endpoint = window.SUPABASE_URL + "/rest/v1/pioneer_leads";
-  const payload = {
-    full_name: full_name || "Sinh viên Pioneer",
-    phone: phone,
-    school: school || "",
-    utm_source: "vercel-v3-" + new Date().toISOString().slice(0,10)
-  };
-  console.log("Saving to", endpoint, payload);
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": window.SUPABASE_ANON_KEY,
-      "Authorization": "Bearer " + window.SUPABASE_ANON_KEY,
-      "Prefer": "return=minimal"
-    },
-    body: JSON.stringify(payload)
-  });
-  const text = await res.text();
-  console.log("Supabase response", res.status, text);
-  if(!res.ok) throw new Error("Supabase " + res.status + ": " + text);
-  return true;
-}
+// Intercept form submit của React landing
+document.addEventListener('submit', async function(e) {
+  const form = e.target;
+  // Chỉ xử lý form có input phone hoặc email
+  const phoneInput = form.querySelector('input[type="tel"], input[name="phone"], input[placeholder*="phone" i], input[placeholder*="điện" i]');
+  const nameInput = form.querySelector('input[name="full_name"], input[name="name"], input[placeholder*="tên" i], input[placeholder*="Họ" i]');
+  const emailInput = form.querySelector('input[type="email"], input[name="email"]');
+  const schoolInput = form.querySelector('input[name="school"], input[placeholder*="trường" i], input[placeholder*="School" i]');
 
-document.addEventListener('DOMContentLoaded', function() {
-  const forms = document.querySelectorAll('form');
-  console.log("Found forms:", forms.length);
-  const targetForm = forms[forms.length - 1];
-  if(!targetForm) return;
-  
-  // Remove old listeners by cloning
-  const newForm = targetForm.cloneNode(true);
-  targetForm.parentNode.replaceChild(newForm, targetForm);
-  
-  newForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const inputs = newForm.querySelectorAll('input');
-    const full_name = inputs[0]?.value?.trim();
-    const phone = inputs[1]?.value?.trim();
-    const school = inputs[2]?.value?.trim();
-    
-    console.log("Form submit", {full_name, phone, school});
-    
-    if(!phone || phone.length < 9) {
-      alert("Vui lòng nhập SĐT hợp lệ");
-      return;
-    }
-    
-    const btn = newForm.querySelector('button');
-    const origHTML = btn ? btn.innerHTML : "";
-    if(btn) { btn.disabled = true; btn.innerHTML = "Đang lưu..."; }
-    
-    try {
-      await saveLead(full_name, phone, school);
-      if(btn) {
-        btn.innerHTML = "✓ Đã giữ suất thành công!";
-        btn.style.background = "#00A651";
-        btn.disabled = true;
-      }
-      // Thêm thông báo
-      let msg = newForm.querySelector('.xanh24-success-msg');
-      if(!msg) {
-        msg = document.createElement('div');
-        msg.className = 'xanh24-success-msg';
-        msg.style.cssText = 'margin-top:12px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:8px;text-align:center;font-weight:600';
-        newForm.appendChild(msg);
-      }
-      msg.innerHTML = "✓ Đã lưu vào hệ thống! Đội ngũ Xanh24 sẽ gọi bạn trong 15 phút<br><small>Check Supabase → pioneer_leads sẽ thấy ngay</small>";
-      
-    } catch(err) {
-      console.error("Save failed", err);
-      alert("Lỗi lưu: " + err.message + "\n\nMở F12 → Console chụp màn hình gửi dev!");
-      if(btn) { btn.disabled = false; btn.innerHTML = origHTML; }
-    }
-  });
-  console.log("Xanh24 V3 form hook ready on form", newForm);
-});
+  if(!phoneInput && !nameInput && !form.matches('form')) return;
 
-// Also hook via submit capture as backup
-document.addEventListener('submit', function(e) {
-  // backup if DOMContentLoaded missed
+  // Nếu không có supabase client thì bỏ qua để form gốc xử lý
+  if(!window.supabaseClient) {
+    console.log("Chưa có anon key, form sẽ chạy theo logic cũ");
+    return;
+  }
+
+  e.preventDefault();
+  const full_name = nameInput ? nameInput.value : (form.querySelector('input')?.value || 'Sinh viên Pioneer');
+  const phone = phoneInput ? phoneInput.value : '';
+  const email = emailInput ? emailInput.value : '';
+  const school = schoolInput ? schoolInput.value : '';
+
+  if(!phone) { alert('Vui lòng nhập số điện thoại'); return; }
+
+  const btn = form.querySelector('button[type="submit"]');
+  const originalText = btn ? btn.innerText : '';
+  if(btn) { btn.disabled = true; btn.innerText = 'Đang gửi...'; }
+
+  try {
+    const { data, error } = await window.supabaseClient
+      .from('pioneer_leads')
+      .insert([{ full_name, phone, email, school, utm_source: new URLSearchParams(window.location.search).get('utm_source') || 'landing-pioneer-temp' }])
+      .select();
+    if(error) throw error;
+    alert('🎉 Đăng ký Pioneer thành công! Xanh24 sẽ liên hệ trong 24h.');
+    form.reset();
+    // Gửi event cho analytics
+    if(window.gtag) gtag('event','pioneer_register',{ phone });
+  } catch(err) {
+    console.error(err);
+    alert('Lỗi: ' + (err.message || 'Không gửi được, thử lại nhé'));
+  } finally {
+    if(btn) { btn.disabled = false; btn.innerText = originalText; }
+  }
 }, true);
 </script>
 

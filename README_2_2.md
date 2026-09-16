@@ -77,9 +77,3 @@ Nếu bạn muốn mình đấu nối sẵn Supabase vào code, gửi mình URL 
 Cần hỗ trợ thêm domain xanh24.vn?
 - Vercel > Settings > Domains > Add xanh24.vn / smart-campus.xanh24.vn
 - Trỏ CNAME về cname.vercel-dns.com
-
-
-## UPDATE - Supabase Integration (2026-05-13)
-- File index.html đã có sẵn script Supabase
-- Cần thay ANON_KEY: mở index.html tìm %%ANON_KEY_PLACEHOLDER%% và dán anon key từ Supabase > Settings > API > anon public
-- Sau khi dán, push lên GitHub, Vercel tự redeploy
