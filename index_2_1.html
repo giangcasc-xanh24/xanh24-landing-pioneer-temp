@@ -48,10 +48,11 @@ Error generating stack: `+o.message+`
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
 
-
+<!-- SUPABASE INTEGRATION FOR PIONEER LEADS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
 <script>
 window.SUPABASE_URL = "https://imwzcdobpvuuwfadaxbb.supabase.co";
-window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltd3pjZG9icHZ1dXdmYWRheGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMDc5MTMsImV4cCI6MjEwNDU4MzkxM30.sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E"; // <-- bạn dán anon key vào đây
+window.SUPABASE_ANON_KEY = "%%ANON_KEY_PLACEHOLDER%%"; // <-- bạn dán anon key vào đây
 window.supabaseClient = null;
 try {
   if(window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY && !window.SUPABASE_ANON_KEY.includes("PLACEHOLDER")) {
@@ -106,88 +107,6 @@ document.addEventListener('submit', async function(e) {
     if(btn) { btn.disabled = false; btn.innerText = originalText; }
   }
 }, true);
-</script>
-
-
-<!-- SUPABASE FIX V2 - 2026-05-13 -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
-<script>
-window.SUPABASE_URL = "https://imwzcdobpvuuwfadaxbb.supabase.co";
-window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltd3pjZG9icHZ1dXdmYWRheGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMDc5MTMsImV4cCI6MjEwNDU4MzkxM30.sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E";
-window.supabaseClient = null;
-try {
-  window.supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-  console.log("Supabase V2 connected");
-} catch(e) { console.error("Supabase init error", e); }
-
-document.addEventListener('submit', async function(e) {
-  const form = e.target;
-  // tìm input theo thứ tự trong section đăng ký
-  const inputs = form.querySelectorAll('input');
-  if(inputs.length < 2) return;
-  // Heuristic: form có 3 input (tên, sđt, trường) ở cuối landing
-  const isPioneerForm = document.body.innerHTML.includes('Sẵn sàng cho học kỳ mới');
-  if(!form.closest('section') && inputs.length < 2) return;
-
-  // Chỉ xử lý form cuối trang
-  const allForms = document.querySelectorAll('form');
-  const isLastForm = form === allForms[allForms.length - 1];
-  if(!isLastForm) return;
-
-  if(!window.supabaseClient) {
-    console.warn("Supabase client not ready");
-    return;
-  }
-
-  e.preventDefault();
-  e.stopImmediatePropagation();
-
-  const full_name = inputs[0]?.value?.trim() || '';
-  const phone = inputs[1]?.value?.trim() || '';
-  const school = inputs[2]?.value?.trim() || '';
-
-  if(!phone || phone.length < 9) { alert('Vui lòng nhập số điện thoại hợp lệ'); return; }
-
-  const btn = form.querySelector('button[type="submit"]');
-  const orig = btn ? btn.innerHTML : '';
-  if(btn) { btn.disabled = true; btn.innerHTML = 'Đang gửi...'; }
-
-  try {
-    console.log("Inserting:", {full_name, phone, school});
-    const { data, error } = await window.supabaseClient
-      .from('pioneer_leads')
-      .insert([{ 
-        full_name: full_name || 'Sinh viên Pioneer', 
-        phone: phone, 
-        school: school,
-        utm_source: new URLSearchParams(window.location.search).get('utm_source') || 'vercel-production'
-      }]);
-
-    if(error) throw error;
-
-    console.log("Insert success");
-    // Hiển thị trạng thái thành công ngay trên nút
-    if(btn) {
-      btn.innerHTML = '✓ Đã giữ suất thành công!';
-      btn.style.background = '#00A651';
-    }
-    // Tạo thông báo đẹp thay vì alert
-    const msg = document.createElement('div');
-    msg.style.cssText = 'margin-top:12px;color:#00A651;font-weight:600;text-align:center';
-    msg.innerText = 'Đội ngũ Xanh24 sẽ gọi bạn trong 15 phút • Ưu tiên 500 suất Pioneer';
-    form.appendChild(msg);
-
-    setTimeout(() => form.reset(), 500);
-
-  } catch(err) {
-    console.error("Supabase insert error:", err);
-    alert('Lỗi lưu data: ' + (err.message || JSON.stringify(err)) + '\n\nHãy chụp màn hình này gửi dev!');
-    if(btn) { btn.disabled = false; btn.innerHTML = orig; }
-  }
-}, true);
-
-// FIX RLS - chạy 1 lần để tự sửa policy nếu chưa đúng
-console.log("Pioneer form hook ready");
 </script>
 
 </body>
