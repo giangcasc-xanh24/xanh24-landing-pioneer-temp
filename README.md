@@ -1,85 +1,52 @@
-# Xanh24 Smart Campus - Landing FINAL
+# Xanh24 Landing V30 - Deploy hướng dẫn
 
-Bản chốt FINAL 45 - Đã thay logo trong suốt, giữ nguyên hero/header/form.
-
-## Cấu trúc
-- index.html: file chính (single-file React, đã embed logo transparent base64 + SEO meta)
-- assets/logo-xanh24-transparent.png: logo trong suốt dùng cho header/OG
-- assets/logo-xanh24-original.png: bản gốc
-
-## 1. Upload lên GitHub
-1. Tạo repo mới: github.com/new -> tên xanh24-smart-campus
-2. Trong thư mục này chạy:
+## Cấu trúc folder (BẮT BUỘC cho Vercel):
 ```
-git init
+xanh24-deploy/
+├── index.html              <- Landing chính (V30)
+├── Landing_Page_1_light.mp4 <- Video fallback (root)
+├── public/
+│   └── video/
+│       └── pioneer-day.mp4 <- Video chính cho popup LIVE
+└── logo.png
+```
+
+## Cách up lên GitHub (3 cách):
+
+### Cách 1: GitHub Web (dễ nhất cho bạn)
+1. Vào repo: https://github.com/xanh-24/xanh24-landing-pioneer-temp-hdr58orar-xanh-24
+2. Bấm Add file -> Upload files
+3. Kéo thả file index.html vào (ghi đè file cũ)
+4. Bấm Add file -> Create new file
+   - Tên file: public/video/pioneer-day.mp4 (gõ y nguyên, GitHub sẽ tự tạo folder)
+   - GitHub web không upload được MP4 lớn >25MB qua web, nên dùng Cách 2
+5. Nên dùng Cách 2 hoặc 3 cho video
+
+### Cách 2: Dùng Git trên máy (khuyên dùng)
+```bash
+# 1. Clone repo
+git clone https://github.com/xanh-24/xanh24-landing-pioneer-temp-hdr58orar-xanh-24.git
+cd xanh24-landing-pioneer-temp-hdr58orar-xanh-24
+
+# 2. Copy file từ folder xanh24-deploy vào đây
+# - index.html -> ghi đè
+# - public/video/pioneer-day.mp4 -> tạo folder public/video/ rồi copy
+
+# 3. Push
 git add .
-git commit -m "feat: Xanh24 Smart Campus FINAL - transparent logo + SEO"
-git branch -M main
-git remote add origin https://github.com/<username>/xanh24-smart-campus.git
-git push -u origin main
+git commit -m "V30 final with real video 7.4MB"
+git push
 ```
 
-## 2. Deploy lên Vercel (1 click)
-- Vào vercel.com -> Add New Project -> Import Git Repository vừa tạo
-- Framework Preset: Other / Static
-- Build Command: để trống
-- Output Directory: để trống (hoặc .)
-- Deploy -> sẽ có domain https://xanh24-smart-campus.vercel.app
+### Cách 3: Vercel Drag & Drop (nhanh nhất)
+1. Vào https://vercel.com/dashboard
+2. Chọn project xanh24-landing-pioneer-temp-hdr58orar-xanh-24
+3. Vào tab Deployments -> Drag file ZIP xanh24-deploy.zip vào
+4. Vercel tự deploy
 
-Hoặc dùng CLI:
-```
-npm i -g vercel
-vercel --prod
-```
-
-File vercel.json đã cấu hình SPA fallback + cache header cho assets.
-
-## 3. Kết nối Supabase (cho form đăng ký Pioneer)
-
-Landing hiện có form. Để lưu data:
-
-a) Tạo project Supabase: supabase.com -> New Project
-b) Tạo bảng:
-SQL Editor chạy:
-```sql
-create table pioneer_leads (
-  id uuid default gen_random_uuid() primary key,
-  full_name text,
-  phone text,
-  email text,
-  school text,
-  created_at timestamp default now()
-);
--- Bật RLS và cho phép insert public
-alter table pioneer_leads enable row level security;
-create policy "Allow public insert" on pioneer_leads for insert with check (true);
-create policy "Allow read for auth" on pioneer_leads for select using (auth.role() = 'authenticated');
-```
-
-c) Lấy URL + anon key ở Project Settings > API
-d) Trong index.html, tìm chỗ handleSubmit form (search: handleSubmit / onSubmit) và thay bằng:
-```js
-const { createClient } = supabase;
-const supabaseClient = createClient('YOUR_SUPABASE_URL','YOUR_SUPABASE_ANON_KEY');
-await supabaseClient.from('pioneer_leads').insert([{full_name, phone, email, school}]);
-```
-
-Nếu bạn muốn mình đấu nối sẵn Supabase vào code, gửi mình URL + anon key mình patch sẵn.
-
-## SEO đã có sẵn
-- <title>, description, canonical, OG, Twitter, lang=vi, theme-color #00A651
-- Không rebuild hero/form như yêu cầu.
-
-## Logo
-- Đã loại bỏ nền trắng, chỉ giữ đồng xu vàng.
-- Dùng assets/logo-xanh24-transparent.png cho mọi nơi cần.
-
-Cần hỗ trợ thêm domain xanh24.vn?
-- Vercel > Settings > Domains > Add xanh24.vn / smart-campus.xanh24.vn
-- Trỏ CNAME về cname.vercel-dns.com
-
-
-## UPDATE - Supabase Integration (2026-05-13)
-- File index.html đã có sẵn script Supabase
-- Cần thay ANON_KEY: mở index.html tìm %%ANON_KEY_PLACEHOLDER%% và dán anon key từ Supabase > Settings > API > anon public
-- Sau khi dán, push lên GitHub, Vercel tự redeploy
+## Sau deploy test:
+- Vào https://...vercel.app/?nocache=1
+- Góc phải dưới: popup LIVE TỪ SỰ KIỆN tự play preview
+- Bấm vào popup -> modal mở video MB - Xanh24 đón sinh viên Pioneer có tiếng
+- Form: Sinh viên / Nhà trường / Đối tác -> nút đổi text
+- Submit: Supabase 201
