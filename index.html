@@ -48,73 +48,51 @@ Error generating stack: `+o.message+`
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
 
-
 <script>
-window.SUPABASE_URL = "https://imwzcdobpvuuwfadaxbb.supabase.co";
-window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltd3pjZG9icHZ1dXdmYWRheGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMDc5MTMsImV4cCI6MjEwNDU4MzkxM30.sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E"; // <-- bạn dán anon key vào đây
-
-
-
-
-<script>
-window.SUPABASE_URL = "https://imwzcdobpvuuwfadaxbb.supabase.co";
-window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imltd3pjZG9icHZ1dXdmYWRheGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMDc5MTMsImV4cCI6MjEwNDU4MzkxM30.sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E";
-
-
-<!--- XANH24 V5 CLEAN - ONLY REST - NO SUPABASE-JS --->
-<script>
-console.log("Xanh24 V5 CLEAN loading...");
-const SB_URL = "https://imwzcdobpvuuwfadaxbb.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.[STRIPPED 127 bytes].sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E";
+console.log("Xanh24 V6.1 CLEAN");
+const SB_URL="https://imwzcdobpvuuwfadaxbb.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.[STRIPPED 127 bytes].sN4jiyBUMfbLDrwsO0w3XDIgwn-LzLd25L8R_yIV10E";
 async function saveLead(n,p,s){
-  console.log(">> Saving",n,p,s);
-  const res = await fetch(SB_URL+"/rest/v1/pioneer_leads",{
+  const r=await fetch(SB_URL+"/rest/v1/pioneer_leads",{
     method:"POST",
     headers:{"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":"return=minimal"},
-    body: JSON.stringify({full_name:n||"SV Pioneer", phone:p, school:s||"", utm_source:"v5-final"})
+    body:JSON.stringify({full_name:n||"SV Pioneer",phone:p,school:s||"",utm_source:"v6.1"})
   });
-  const txt = await res.text();
-  console.log("Supabase response:",res.status,txt);
-  if(!res.ok) throw new Error("Lỗi "+res.status+": "+txt);
+  const t=await r.text();
+  console.log("Supabase",r.status,t);
+  if(!r.ok) throw new Error(t);
 }
-function hookV5(){
-  const inputs = Array.from(document.querySelectorAll('input')).filter(i=>i.type!=='hidden');
-  if(inputs.length<3){console.log("Not enough inputs",inputs.length); return;}
-  const targets = inputs.slice(-3);
-  let btn = Array.from(document.querySelectorAll('button')).find(b=>b.textContent.toLowerCase().includes('giữ suất'));
+function hookV61(){
+  const ins=Array.from(document.querySelectorAll('input')).filter(i=>i.type!=='hidden'&&i.type!=='submit');
+  console.log("V6.1 inputs",ins.length);
+  if(ins.length<3) return;
+  const targets=ins.slice(-3);
+  let btn=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.toLowerCase().includes('giữ suất'));
   if(!btn) return;
-  if(btn.dataset.hooked) return;
-  btn.dataset.hooked="1";
-  const clone = btn.cloneNode(true);
-  btn.parentNode.replaceChild(clone,btn);
-  btn=clone;
-  console.log("V5 hooked button:",btn.textContent,"inputs:",targets.length);
-  btn.addEventListener('click', async (e)=>{
+  if(btn.dataset.v61) return;
+  btn.dataset.v61="1";
+  const cl=btn.cloneNode(true);
+  btn.parentNode.replaceChild(cl,btn);
+  btn=cl;
+  console.log("V6.1 hooked",btn.textContent);
+  btn.addEventListener('click',async e=>{
     e.preventDefault();
-    const name=targets[0]?.value?.trim()||"", phone=targets[1]?.value?.trim()||"", school=targets[2]?.value?.trim()||"";
-    console.log("Submit clicked",{name,phone,school});
-    if(!phone||phone.length<9){alert("Nhập SĐT hợp lệ"); return;}
-    const orig=btn.innerHTML;
-    btn.disabled=true; btn.textContent="Đang lưu...";
+    const name=targets[0]?.value?.trim()||"",phone=targets[1]?.value?.trim()||"",school=targets[2]?.value?.trim()||"";
+    console.log("Submit",{name,phone,school});
+    if(!phone||phone.length<9){alert("Nhập SĐT");return;}
+    const orig=btn.innerHTML; btn.disabled=true; btn.innerHTML="Đang lưu...";
     try{
       await saveLead(name,phone,school);
-      btn.textContent="✓ Đã giữ suất thành công!";
+      btn.innerHTML="✓ Đã giữ suất thành công!";
       btn.style.background="#00A651";
-      let msg=document.querySelector('.v5-msg');
-      if(!msg){msg=document.createElement('div'); msg.className='v5-msg'; msg.style.cssText='margin-top:12px;padding:12px;background:#e6ffed;border:1px solid #a7f3d0;color:#065f46;border-radius:8px;text-align:center;font-weight:700'; btn.parentNode.appendChild(msg);}
-      msg.innerHTML="✓ Đã lưu vào Supabase! Mở Table Editor bấm Refresh sẽ thấy ngay 🎉";
-      console.log("DONE");
-    }catch(err){
-      console.error(err);
-      alert("Lỗi lưu: "+err.message);
-      btn.disabled=false; btn.innerHTML=orig;
-    }
+      let msg=document.querySelector('.v61-msg');
+      if(!msg){msg=document.createElement('div');msg.className='v61-msg';msg.style.cssText='margin-top:12px;padding:12px;background:#e6ffed;border:1px solid #a7f3d0;color:#065f46;border-radius:8px;text-align:center;font-weight:700';btn.parentNode.appendChild(msg);}
+      msg.innerHTML="✓ Đã lưu vào Supabase! Refresh Table sẽ thấy ngay 🎉";
+    }catch(err){console.error(err);alert("Lỗi: "+err.message);btn.disabled=false;btn.innerHTML=orig;}
   });
 }
-setTimeout(hookV5,800);
-setTimeout(hookV5,2000);
-setTimeout(hookV5,4000);
-document.addEventListener('DOMContentLoaded',()=>setTimeout(hookV5,500));
+setTimeout(hookV61,800); setTimeout(hookV61,2000); setTimeout(hookV61,4000);
+document.addEventListener('DOMContentLoaded',()=>setTimeout(hookV61,500));
 </script>
 
 </body>
