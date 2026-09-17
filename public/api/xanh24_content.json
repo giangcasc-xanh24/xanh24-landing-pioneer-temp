@@ -1,1 +1,12 @@
-{"hero":{"title":"Ky t�c x� th�ng minh"},"videos":{"popup":{"url":"/video/pioneer-day.mp4"}}} 
+{
+  "hero": {
+    "title": "Ký túc xá thông minh cho thế hệ sinh viên mới",
+    "description": "Hệ sinh thái All-in-One đầu tiên tại Việt Nam"
+  },
+  "videos": {
+    "popup": {
+      "url": "/video/pioneer-day.mp4",
+      "title": "Xanh24 x MB Bank Pioneer Day"
+    }
+  }
+}
