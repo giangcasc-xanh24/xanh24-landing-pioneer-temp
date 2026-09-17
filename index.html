@@ -495,6 +495,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 });
 </script>
-
+<script>
+// V32 FIX - Xóa popup trùng + cho phép đổi video động
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Xóa tất cả popup trùng, chỉ giữ lại 1
+  const all = document.querySelectorAll('#xanh24-live-popup-real');
+  if(all.length>1){
+    for(let i=0;i<all.length-1;i++) all[i].remove();
+  }
+  // Sửa đường dẫn video cho đúng Vercel: /video/...
+  const thumb = document.getElementById('xanh24-thumb-video');
+  const real = document.getElementById('xanh24-real-video');
+  if(thumb) thumb.querySelector('source').src='/video/pioneer-day.mp4';
+  if(real) real.querySelector('source').src='/video/pioneer-day.mp4';
+});
+// Hàm đổi video động - dùng khi bạn muốn đẩy video mới
+window.setXanh24Video = function(url){
+  const t = document.getElementById('xanh24-thumb-video');
+  const r = document.getElementById('xanh24-real-video');
+  if(t){ t.src=url; t.load(); t.play().catch(()=>{}); }
+  if(r){ r.src=url; r.load(); }
+  console.log('Đã đổi video thành:', url);
+};
+</script>
 </body>
 </html>
